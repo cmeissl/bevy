@@ -137,6 +137,7 @@ This is the complete `bevy` cargo feature list, without "profiles" or "collectio
 |ghost_nodes|Experimental support for nodes that are ignored for UI layouting|
 |gif|GIF image format support|
 |glam_assert|Enable assertions to check the validity of parameters passed to glam|
+|glsl_shader_passthrough|Enable passthrough loading for GLSL shaders (Only supported on Gl, shader capabilities and extensions must agree with the platform implementation)|
 |gltf_animation|Enable glTF animation loading|
 |hdr|HDR image format support|
 |hotpatching|Enable hotpatching of Bevy systems|

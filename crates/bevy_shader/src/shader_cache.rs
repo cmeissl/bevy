@@ -29,6 +29,11 @@ pub enum ShaderCacheSource<'a> {
     SpirV(&'a [u8]),
     /// WGSL module as a string slice.
     Wgsl(String),
+    /// Glsl shader
+    Glsl { 
+        src: String ,
+        stage: naga::ShaderStage,
+    },
     /// Naga module.
     #[cfg(not(feature = "decoupled_naga"))]
     Naga(naga::Module),
@@ -261,6 +266,14 @@ impl<ShaderModule, RenderDevice> ShaderCache<ShaderModule, RenderDevice> {
                             ShaderCacheSource::Wgsl(compiled.to_string())
                         } else {
                             panic!("Wesl shaders must be imported from a file");
+                        }
+                    }
+                    Source::Glsl(data, stage)
+                        if shader.imports.is_empty() && shader_defs.is_empty() =>
+                    {
+                        ShaderCacheSource::Glsl {
+                            src: data.clone().into_owned(),
+                            stage: *stage,
                         }
                     }
                     _ => {

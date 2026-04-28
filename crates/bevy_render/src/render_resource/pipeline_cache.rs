@@ -126,6 +126,14 @@ fn load_module(
         ShaderCacheSource::SpirV(_) => {
             unimplemented!("Enable feature \"shader_format_spirv\" to use SPIR-V shaders")
         }
+        #[cfg(feature = "shader_format_glsl")]
+        ShaderCacheSource::Glsl { src, stage } => {
+            ShaderSource::Glsl { shader: Cow::Owned(src), stage, defines: Default::default() }
+        },
+        #[cfg(not(feature = "shader_format_glsl"))]
+        ShaderCacheSource::Glsl { .. } => {
+            unimplemented!("Enable feature \"shader_format_glsl\" to use Glsl shaders")
+        },
         ShaderCacheSource::Wgsl(src) => ShaderSource::Wgsl(Cow::Owned(src)),
         #[cfg(not(feature = "decoupled_naga"))]
         ShaderCacheSource::Naga(src) => ShaderSource::Naga(Cow::Owned(src)),

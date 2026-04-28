@@ -26,9 +26,13 @@ multi_threaded = ["bevy_tasks/multi_threaded", "bevy_transform/multi_threaded"]
 morph = ["bevy_mesh/morph"]
 
 shader_format_spirv = ["bevy_shader/shader_format_spirv", "wgpu/spirv"]
+shader_format_glsl = ["bevy_shader/shader_format_glsl", "wgpu/glsl"]
 
 # Enable SPIR-V shader passthrough
 spirv_shader_passthrough = ["wgpu/spirv"]
+
+# Enable GLSL shader passthrough
+glsl_shader_passthrough = ["wgpu/glsl"]
 
 # Statically linked DXC shader compiler for DirectX 12
 # TODO: When wgpu switches to DirectX 12 instead of Vulkan by default on windows, make this a default feature

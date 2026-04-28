@@ -56,8 +56,8 @@ impl RenderDevice {
         &self,
         desc: wgpu::ShaderModuleDescriptor,
     ) -> wgpu::ShaderModule {
-        #[cfg(feature = "spirv_shader_passthrough")]
         match &desc.source {
+            #[cfg(feature = "spirv_shader_passthrough")]
             wgpu::ShaderSource::SpirV(source)
                 if self
                     .features()
@@ -76,20 +76,28 @@ impl RenderDevice {
                     )
                 }
             }
-            // SAFETY:
-            //
-            // This call passes binary data to the backend as-is and can potentially result in a driver crash or bogus behavior.
-            // No attempt is made to ensure that data is valid SPIR-V.
+            #[cfg(feature = "glsl_shader_passthrough")]
+            wgpu::ShaderSource::Glsl { shader, .. } if self
+                    .features()
+                    .contains(wgpu::Features::PASSTHROUGH_SHADERS) => {
+                // SAFETY:
+                // This call passes binary data to the backend as-is and can potentially result in a driver crash or bogus behavior.
+                // No attempt is made to ensure that data is valid Glsl.
+                unsafe {
+                    self.device.create_shader_module_passthrough(
+                        wgpu::ShaderModuleDescriptorPassthrough {
+                            label: desc.label,
+                            glsl: Some(shader.clone()),
+                            ..Default::default()
+                        },
+                    )
+                }
+            }
+            // SAFETY: the caller is responsible for upholding the safety requirements
             _ => unsafe {
                 self.device
                     .create_shader_module_trusted(desc, wgpu::ShaderRuntimeChecks::unchecked())
             },
-        }
-        #[cfg(not(feature = "spirv_shader_passthrough"))]
-        // SAFETY: the caller is responsible for upholding the safety requirements
-        unsafe {
-            self.device
-                .create_shader_module_trusted(desc, wgpu::ShaderRuntimeChecks::unchecked())
         }
     }
 
@@ -101,13 +109,13 @@ impl RenderDevice {
         &self,
         desc: wgpu::ShaderModuleDescriptor,
     ) -> wgpu::ShaderModule {
-        #[cfg(feature = "spirv_shader_passthrough")]
         match &desc.source {
+            #[cfg(feature = "spirv_shader_passthrough")]
             wgpu::ShaderSource::SpirV(_source) => panic!("no safety checks are performed for spirv shaders. use `create_shader_module` instead"),
+            #[cfg(feature = "glsl_shader_passthrough")]
+            wgpu::ShaderSource::Glsl { .. } => panic!("no safety checks are performed for glsl shaders. use `create_shader_module` instead"),
             _ => self.device.create_shader_module(desc),
         }
-        #[cfg(not(feature = "spirv_shader_passthrough"))]
-        self.device.create_shader_module(desc)
     }
 
     /// Check for resource cleanups and mapping callbacks.
